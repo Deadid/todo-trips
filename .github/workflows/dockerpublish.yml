@@ -15,7 +15,9 @@ on:
 
 env:
   # TODO: Change variable to your image's name.
-  IMAGE_NAME: image
+  IMAGE_NAME: todo-trips-ui
+  PROJECT_ID: todo-trips
+
 
 jobs:
   # Run tests.
@@ -49,7 +51,13 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-
+      - uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
+        with:
+          version: '285.0.0'
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          service_account_email: ${{ secrets.GCP_SA_EMAIL }}
+          service_account_key: ${{ secrets.GCP_SA_KEY }}
+          export_default_credentials: true
       - name: Build image
         run: docker build -f ./packages/ui/Dockerfile -t image ./packages/ui/.
 
@@ -58,7 +66,7 @@ jobs:
 
       - name: Push image
         run: |
-          IMAGE_ID=docker.pkg.github.com/${{ github.repository }}/$IMAGE_NAME
+          IMAGE_ID=gcr.io/$PROJECT_ID/$IMAGE_NAME
           
           # Change all uppercase to lowercase
           IMAGE_ID=$(echo $IMAGE_ID | tr '[A-Z]' '[a-z]')
